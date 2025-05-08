@@ -8,7 +8,7 @@
         public int IngredientId { get; set; }
         public virtual Ingredient Ingredient { get; set; } = null!;
 
-        public decimal Quantity { get; set; } // Amount of the ingredient in the recipe
+        public int Quantity { get; set; } // Amount of the ingredient in the recipe
         public int ImportanceLevel { get; set; } // 1-5 scale for importance of the ingredient in the recipe
     }
 }

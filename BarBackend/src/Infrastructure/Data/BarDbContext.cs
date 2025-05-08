@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BarBackend.Domain
 {
+    // dotnet ef migrations add InitialBar --project 'src/Infrastructure/Infrastructure.csproj' --startup-project 'src/web' --context 'BarDbContext' --output-dir 'Data/Migrations/Bar'
+    // dotnet ef database update --project 'src/Infrastructure/Infrastructure.csproj' --startup-project 'src/web' --context 'BarDbContext'
     public class BarDbContext(DbContextOptions<BarDbContext> options) : DbContext(options)
     {
         public DbSet<Ingredient> Ingredients { get; set; } = null!;
@@ -32,7 +34,11 @@ namespace BarBackend.Domain
             modelBuilder.Entity<Ingredient>()
                 .HasOne(i => i.Category)
                 .WithMany(c => c.Ingredients)
-                .HasForeignKey(i => i.CategoryId);          
+                .HasForeignKey(i => i.CategoryId);      
+            
+            modelBuilder.Entity<Ingredient>()
+                .Property(i => i.MeasurementValue)
+                .HasPrecision(18, 2); // Adjust precision and scale as needed
         }
     }
 }

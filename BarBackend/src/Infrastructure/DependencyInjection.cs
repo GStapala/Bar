@@ -1,4 +1,5 @@
 ﻿using BarBackend.Application.Common.Interfaces;
+using BarBackend.Domain;
 using BarBackend.Domain.Constants;
 using BarBackend.Infrastructure.Data;
 using BarBackend.Infrastructure.Data.Interceptors;
@@ -26,11 +27,19 @@ public static class DependencyInjection
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
 
             options.UseSqlServer(connectionString);
+        });       
+        
+        services.AddDbContext<BarDbContext>((sp, options) =>
+        {
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+
+            options.UseSqlServer(connectionString);
         });
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         services.AddScoped<ApplicationDbContextInitialiser>();
+        services.AddScoped<BarDbContextInitialiser>();
 
         services
             .AddDefaultIdentity<ApplicationUser>()
