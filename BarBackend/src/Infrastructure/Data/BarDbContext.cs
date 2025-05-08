@@ -1,11 +1,12 @@
-﻿using BarBackend.Domain.Entities;
+﻿using BarBackend.Application.Common.Interfaces;
+using BarBackend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BarBackend.Domain
 {
     // dotnet ef migrations add InitialBar --project 'src/Infrastructure/Infrastructure.csproj' --startup-project 'src/web' --context 'BarDbContext' --output-dir 'Data/Migrations/Bar'
     // dotnet ef database update --project 'src/Infrastructure/Infrastructure.csproj' --startup-project 'src/web' --context 'BarDbContext'
-    public class BarDbContext(DbContextOptions<BarDbContext> options) : DbContext(options)
+    public class BarDbContext(DbContextOptions<BarDbContext> options) : DbContext(options), IBarDbContext
     {
         public DbSet<Ingredient> Ingredients { get; set; } = null!;
         public DbSet<Category> Categories { get; set; } = null!;

@@ -19,7 +19,7 @@ namespace BarBackend.Domain.Entities
         // Navigation property
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
-        public virtual required Category Category { get; set; } // alcohol, mixer, garnish, etc.
+        public virtual Category? Category { get; set; } // alcohol, mixer, garnish, etc.
         public virtual ICollection<Category> SubCategory { get; set; } = new List<Category>();
         public virtual ICollection<RecipeIngredient>? RecipeIngredients { get; set; }
     }
