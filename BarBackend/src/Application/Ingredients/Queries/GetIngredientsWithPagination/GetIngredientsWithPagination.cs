@@ -1,13 +1,11 @@
 ﻿using BarBackend.Application.Common.Interfaces;
 using BarBackend.Application.Common.Mappings;
 using BarBackend.Application.Common.Models;
-using BarBackend.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 
 namespace BarBackend.Application.Ingredients.Queries.GetIngredientsWithPagination;
 
 public record GetIngredientsWithPaginationQuery : IRequest<PaginatedList<IngredientDto>>
 {
-    public int ListId { get; init; }
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 10;
 }
