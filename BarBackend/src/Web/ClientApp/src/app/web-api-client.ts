@@ -18,7 +18,7 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 export interface ICategoriesClient {
     getCategoriesWithPagination(pageNumber: number, pageSize: number): Observable<PaginatedListOfCategoryDto>;
     createCategory(command: CreateCategoryCommand): Observable<number>;
-    getSubCategoriesWithPagination(parentCategoryId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfCategoryDto>;
+    getSubCategoriesWithPagination(id: number, parentCategoryId: number, pageNumber: number, pageSize: number): Observable<void>;
     updateCategory(id: number, command: UpdateCategoryCommand): Observable<void>;
     deleteCategory(id: number): Observable<void>;
 }
@@ -145,8 +145,11 @@ export class CategoriesClient implements ICategoriesClient {
         return _observableOf(null as any);
     }
 
-    getSubCategoriesWithPagination(parentCategoryId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfCategoryDto> {
-        let url_ = this.baseUrl + "/api/Categories/api/Categories/SubCategories?";
+    getSubCategoriesWithPagination(id: number, parentCategoryId: number, pageNumber: number, pageSize: number): Observable<void> {
+        let url_ = this.baseUrl + "/api/Categories/{id}/subcategories?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
         if (parentCategoryId === undefined || parentCategoryId === null)
             throw new Error("The parameter 'parentCategoryId' must be defined and cannot be null.");
         else
@@ -165,7 +168,6 @@ export class CategoriesClient implements ICategoriesClient {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Accept": "application/json"
             })
         };
 
@@ -176,14 +178,14 @@ export class CategoriesClient implements ICategoriesClient {
                 try {
                     return this.processGetSubCategoriesWithPagination(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<PaginatedListOfCategoryDto>;
+                    return _observableThrow(e) as any as Observable<void>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<PaginatedListOfCategoryDto>;
+                return _observableThrow(response_) as any as Observable<void>;
         }));
     }
 
-    protected processGetSubCategoriesWithPagination(response: HttpResponseBase): Observable<PaginatedListOfCategoryDto> {
+    protected processGetSubCategoriesWithPagination(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -192,10 +194,7 @@ export class CategoriesClient implements ICategoriesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = PaginatedListOfCategoryDto.fromJS(resultData200);
-            return _observableOf(result200);
+            return _observableOf(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {

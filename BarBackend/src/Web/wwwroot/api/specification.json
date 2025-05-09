@@ -79,7 +79,7 @@
         }
       }
     },
-    "/api/Categories/api/Categories/SubCategories": {
+    "/api/Categories/{id}/subcategories": {
       "get": {
         "tags": [
           "Categories"
@@ -87,8 +87,8 @@
         "operationId": "GetSubCategoriesWithPagination",
         "parameters": [
           {
-            "name": "ParentCategoryId",
-            "in": "query",
+            "name": "id",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
@@ -97,7 +97,7 @@
             "x-position": 1
           },
           {
-            "name": "PageNumber",
+            "name": "ParentCategoryId",
             "in": "query",
             "required": true,
             "schema": {
@@ -107,7 +107,7 @@
             "x-position": 2
           },
           {
-            "name": "PageSize",
+            "name": "PageNumber",
             "in": "query",
             "required": true,
             "schema": {
@@ -115,18 +115,21 @@
               "format": "int32"
             },
             "x-position": 3
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 4
           }
         ],
         "responses": {
           "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedListOfCategoryDto"
-                }
-              }
-            }
+            "description": ""
           }
         }
       }

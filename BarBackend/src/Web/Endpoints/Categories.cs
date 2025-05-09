@@ -13,7 +13,7 @@ public class Categories : EndpointGroupBase
         app.MapGroup(this)
             .RequireAuthorization()
             .MapGet(GetCategoriesWithPagination)
-            .MapGet(GetSubCategoriesWithPagination, "/api/Categories/SubCategories")
+            .MapGet(GetSubCategoriesWithPagination, "{id}/subcategories")
             .MapPost(CreateCategory)
             .MapPut(UpdateCategory, "{id}")
             .MapDelete(DeleteCategory, "{id}");
@@ -42,8 +42,10 @@ public class Categories : EndpointGroupBase
         return Results.NoContent();
     }
 
-    public async Task<PaginatedList<CategoryDto>> GetSubCategoriesWithPagination(ISender sender, [AsParameters] GetSubCategoriesWithPaginationQuery query)
+    public async Task<IResult> GetSubCategoriesWithPagination(ISender sender, int id, [AsParameters] GetSubCategoriesWithPaginationQuery query)
     {
-        return await sender.Send(query);
+        if (id != query.ParentCategoryId) return Results.BadRequest("ParentCategoryId does not match the provided id.");
+        var result = await sender.Send(query);
+        return Results.Ok(result);
     }
 }
