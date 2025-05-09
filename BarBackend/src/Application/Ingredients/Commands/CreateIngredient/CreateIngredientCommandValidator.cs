@@ -1,4 +1,6 @@
-﻿namespace BarBackend.Application.Ingredients.Commands.CreateIngredientItem;
+﻿using BarBackend.Application.Ingredients.Commands.CreateIngredient;
+
+namespace BarBackend.Application.Ingredients.Commands.CreateIngredientItem;
 
 public class CreateIngredientCommandValidator : AbstractValidator<CreateIngredientCommand>
 {

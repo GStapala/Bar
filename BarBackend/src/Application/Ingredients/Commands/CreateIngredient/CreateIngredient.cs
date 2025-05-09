@@ -3,7 +3,7 @@ using BarBackend.Domain.Entities;
 using BarBackend.Domain.Enums;
 using BarBackend.Domain.Events;
 
-namespace BarBackend.Application.Ingredients.Commands.CreateIngredientItem;
+namespace BarBackend.Application.Ingredients.Commands.CreateIngredient;
 
 public record CreateIngredientCommand : IRequest<int>
 {

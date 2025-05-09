@@ -1,5 +1,5 @@
 ﻿using BarBackend.Application.Common.Models;
-using BarBackend.Application.Ingredients.Commands.CreateIngredientItem;
+using BarBackend.Application.Ingredients.Commands.CreateIngredient;
 using BarBackend.Application.Ingredients.Commands.DeleteIngredient;
 using BarBackend.Application.Ingredients.Commands.UpdateIngredient;
 using BarBackend.Application.Ingredients.Queries.GetIngredientsWithPagination;
