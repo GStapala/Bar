@@ -1,0 +1,6 @@
+﻿GET {{host}}/api/Categories?PageNumber=1&PageSize=100
+content-Type: application/json
+
+###
+@ParentCategoryId = 1057
+GET {{host}}/api/Categories/{{ParentCategoryId}}/subcategories?ParentCategoryId={{ParentCategoryId}}&PageNumber=1&PageSize=1
