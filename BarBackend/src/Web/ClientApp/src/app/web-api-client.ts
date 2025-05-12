@@ -1446,6 +1446,7 @@ export interface ICategoryDto {
 
 export class CreateCategoryCommand implements ICreateCategoryCommand {
     name!: string;
+    parentCategoryId?: number;
 
     constructor(data?: ICreateCategoryCommand) {
         if (data) {
@@ -1459,6 +1460,7 @@ export class CreateCategoryCommand implements ICreateCategoryCommand {
     init(_data?: any) {
         if (_data) {
             this.name = _data["name"];
+            this.parentCategoryId = _data["parentCategoryId"];
         }
     }
 
@@ -1472,12 +1474,14 @@ export class CreateCategoryCommand implements ICreateCategoryCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["name"] = this.name;
+        data["parentCategoryId"] = this.parentCategoryId;
         return data;
     }
 }
 
 export interface ICreateCategoryCommand {
     name: string;
+    parentCategoryId?: number;
 }
 
 export class UpdateCategoryCommand implements IUpdateCategoryCommand {

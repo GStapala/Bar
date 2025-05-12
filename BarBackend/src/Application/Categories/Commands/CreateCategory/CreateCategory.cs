@@ -7,6 +7,7 @@ namespace BarBackend.Application.Categories.Commands.CreateCategory;
 public record CreateCategoryCommand : IRequest<int>
 {
     public required string Name { get; init; }
+    public int ParentCategoryId { get; init; }
 }
 
 public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, int>
@@ -23,7 +24,7 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         var entity = new Category()
         {
             Name = request.Name,
-           
+            ParentCategoryId = request.ParentCategoryId
         };
 
         entity.AddDomainEvent(new CategoryCreatedEvent(entity));

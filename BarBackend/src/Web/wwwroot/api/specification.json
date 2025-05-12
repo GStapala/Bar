@@ -836,6 +836,10 @@
             "type": "string",
             "maxLength": 200,
             "minLength": 10
+          },
+          "parentCategoryId": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

@@ -1,0 +1,3 @@
+﻿###
+GET {{host}}/api/Recipes?PageNumber=1&PageSize=100
+content-Type: application/json
