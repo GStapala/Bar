@@ -531,6 +531,234 @@ export class IngredientsClient implements IIngredientsClient {
     }
 }
 
+export interface IRecipesClient {
+    getRecipesWithPagination(pageNumber: number, pageSize: number): Observable<PaginatedListOfRecipeDto>;
+    createRecipe(command: CreateRecipeCommand): Observable<number>;
+    updateRecipe(id: number, command: UpdateRecipeCommand): Observable<void>;
+    deleteRecipe(id: number): Observable<void>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class RecipesClient implements IRecipesClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getRecipesWithPagination(pageNumber: number, pageSize: number): Observable<PaginatedListOfRecipeDto> {
+        let url_ = this.baseUrl + "/api/Recipes?";
+        if (pageNumber === undefined || pageNumber === null)
+            throw new Error("The parameter 'pageNumber' must be defined and cannot be null.");
+        else
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetRecipesWithPagination(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetRecipesWithPagination(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PaginatedListOfRecipeDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PaginatedListOfRecipeDto>;
+        }));
+    }
+
+    protected processGetRecipesWithPagination(response: HttpResponseBase): Observable<PaginatedListOfRecipeDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaginatedListOfRecipeDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    createRecipe(command: CreateRecipeCommand): Observable<number> {
+        let url_ = this.baseUrl + "/api/Recipes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateRecipe(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateRecipe(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<number>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<number>;
+        }));
+    }
+
+    protected processCreateRecipe(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    updateRecipe(id: number, command: UpdateRecipeCommand): Observable<void> {
+        let url_ = this.baseUrl + "/api/Recipes/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdateRecipe(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdateRecipe(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processUpdateRecipe(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    deleteRecipe(id: number): Observable<void> {
+        let url_ = this.baseUrl + "/api/Recipes/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeleteRecipe(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDeleteRecipe(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDeleteRecipe(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
 export interface ITodoItemsClient {
     getTodoItemsWithPagination(listId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfTodoItemBriefDto>;
     createTodoItem(command: CreateTodoItemCommand): Observable<number>;
@@ -1534,6 +1762,570 @@ export class UpdateIngredientCommand implements IUpdateIngredientCommand {
 export interface IUpdateIngredientCommand {
     id?: number;
     name: string | undefined;
+}
+
+export class PaginatedListOfRecipeDto implements IPaginatedListOfRecipeDto {
+    items?: RecipeDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfRecipeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(RecipeDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfRecipeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfRecipeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfRecipeDto {
+    items?: RecipeDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class RecipeDto implements IRecipeDto {
+    id?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    ingredients?: Ingredient[] | undefined;
+
+    constructor(data?: IRecipeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            if (Array.isArray(_data["ingredients"])) {
+                this.ingredients = [] as any;
+                for (let item of _data["ingredients"])
+                    this.ingredients!.push(Ingredient.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): RecipeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RecipeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        if (Array.isArray(this.ingredients)) {
+            data["ingredients"] = [];
+            for (let item of this.ingredients)
+                data["ingredients"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IRecipeDto {
+    id?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    ingredients?: Ingredient[] | undefined;
+}
+
+export abstract class BaseEntity implements IBaseEntity {
+    id?: number;
+    domainEvents?: BaseEvent[];
+
+    constructor(data?: IBaseEntity) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            if (Array.isArray(_data["domainEvents"])) {
+                this.domainEvents = [] as any;
+                for (let item of _data["domainEvents"])
+                    this.domainEvents!.push(BaseEvent.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BaseEntity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseEntity' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        if (Array.isArray(this.domainEvents)) {
+            data["domainEvents"] = [];
+            for (let item of this.domainEvents)
+                data["domainEvents"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IBaseEntity {
+    id?: number;
+    domainEvents?: BaseEvent[];
+}
+
+export abstract class BaseAuditableEntity extends BaseEntity implements IBaseAuditableEntity {
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date;
+    lastModifiedBy?: string | undefined;
+
+    constructor(data?: IBaseAuditableEntity) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : <any>undefined;
+            this.createdBy = _data["createdBy"];
+            this.lastModified = _data["lastModified"] ? new Date(_data["lastModified"].toString()) : <any>undefined;
+            this.lastModifiedBy = _data["lastModifiedBy"];
+        }
+    }
+
+    static override fromJS(data: any): BaseAuditableEntity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseAuditableEntity' cannot be instantiated.");
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["created"] = this.created ? this.created.toISOString() : <any>undefined;
+        data["createdBy"] = this.createdBy;
+        data["lastModified"] = this.lastModified ? this.lastModified.toISOString() : <any>undefined;
+        data["lastModifiedBy"] = this.lastModifiedBy;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IBaseAuditableEntity extends IBaseEntity {
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date;
+    lastModifiedBy?: string | undefined;
+}
+
+export class Ingredient extends BaseAuditableEntity implements IIngredient {
+    name!: string;
+    measurementType?: MeasurementType | undefined;
+    measurementValue?: number;
+    description?: string | undefined;
+    stockQuantity?: number;
+    categoryId?: number;
+    category?: Category | undefined;
+    subCategory?: Category[];
+    recipeIngredients?: RecipeIngredient[] | undefined;
+
+    constructor(data?: IIngredient) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            this.measurementType = _data["measurementType"] ? MeasurementType.fromJS(_data["measurementType"]) : <any>undefined;
+            this.measurementValue = _data["measurementValue"];
+            this.description = _data["description"];
+            this.stockQuantity = _data["stockQuantity"];
+            this.categoryId = _data["categoryId"];
+            this.category = _data["category"] ? Category.fromJS(_data["category"]) : <any>undefined;
+            if (Array.isArray(_data["subCategory"])) {
+                this.subCategory = [] as any;
+                for (let item of _data["subCategory"])
+                    this.subCategory!.push(Category.fromJS(item));
+            }
+            if (Array.isArray(_data["recipeIngredients"])) {
+                this.recipeIngredients = [] as any;
+                for (let item of _data["recipeIngredients"])
+                    this.recipeIngredients!.push(RecipeIngredient.fromJS(item));
+            }
+        }
+    }
+
+    static override fromJS(data: any): Ingredient {
+        data = typeof data === 'object' ? data : {};
+        let result = new Ingredient();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["measurementType"] = this.measurementType ? this.measurementType.toJSON() : <any>undefined;
+        data["measurementValue"] = this.measurementValue;
+        data["description"] = this.description;
+        data["stockQuantity"] = this.stockQuantity;
+        data["categoryId"] = this.categoryId;
+        data["category"] = this.category ? this.category.toJSON() : <any>undefined;
+        if (Array.isArray(this.subCategory)) {
+            data["subCategory"] = [];
+            for (let item of this.subCategory)
+                data["subCategory"].push(item.toJSON());
+        }
+        if (Array.isArray(this.recipeIngredients)) {
+            data["recipeIngredients"] = [];
+            for (let item of this.recipeIngredients)
+                data["recipeIngredients"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IIngredient extends IBaseAuditableEntity {
+    name: string;
+    measurementType?: MeasurementType | undefined;
+    measurementValue?: number;
+    description?: string | undefined;
+    stockQuantity?: number;
+    categoryId?: number;
+    category?: Category | undefined;
+    subCategory?: Category[];
+    recipeIngredients?: RecipeIngredient[] | undefined;
+}
+
+export class Category extends BaseAuditableEntity implements ICategory {
+    name?: string;
+    ingredients?: Ingredient[];
+    parentCategoryId?: number | undefined;
+    parentCategory?: Category | undefined;
+    subCategories?: Category[];
+
+    constructor(data?: ICategory) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            if (Array.isArray(_data["ingredients"])) {
+                this.ingredients = [] as any;
+                for (let item of _data["ingredients"])
+                    this.ingredients!.push(Ingredient.fromJS(item));
+            }
+            this.parentCategoryId = _data["parentCategoryId"];
+            this.parentCategory = _data["parentCategory"] ? Category.fromJS(_data["parentCategory"]) : <any>undefined;
+            if (Array.isArray(_data["subCategories"])) {
+                this.subCategories = [] as any;
+                for (let item of _data["subCategories"])
+                    this.subCategories!.push(Category.fromJS(item));
+            }
+        }
+    }
+
+    static override fromJS(data: any): Category {
+        data = typeof data === 'object' ? data : {};
+        let result = new Category();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        if (Array.isArray(this.ingredients)) {
+            data["ingredients"] = [];
+            for (let item of this.ingredients)
+                data["ingredients"].push(item.toJSON());
+        }
+        data["parentCategoryId"] = this.parentCategoryId;
+        data["parentCategory"] = this.parentCategory ? this.parentCategory.toJSON() : <any>undefined;
+        if (Array.isArray(this.subCategories)) {
+            data["subCategories"] = [];
+            for (let item of this.subCategories)
+                data["subCategories"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface ICategory extends IBaseAuditableEntity {
+    name?: string;
+    ingredients?: Ingredient[];
+    parentCategoryId?: number | undefined;
+    parentCategory?: Category | undefined;
+    subCategories?: Category[];
+}
+
+export abstract class BaseEvent implements IBaseEvent {
+
+    constructor(data?: IBaseEvent) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): BaseEvent {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseEvent' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IBaseEvent {
+}
+
+export class RecipeIngredient implements IRecipeIngredient {
+    recipeId?: number;
+    recipe?: Recipe;
+    ingredientId?: number;
+    ingredient?: Ingredient;
+    quantity?: number;
+    importanceLevel?: number;
+
+    constructor(data?: IRecipeIngredient) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.recipeId = _data["recipeId"];
+            this.recipe = _data["recipe"] ? Recipe.fromJS(_data["recipe"]) : <any>undefined;
+            this.ingredientId = _data["ingredientId"];
+            this.ingredient = _data["ingredient"] ? Ingredient.fromJS(_data["ingredient"]) : <any>undefined;
+            this.quantity = _data["quantity"];
+            this.importanceLevel = _data["importanceLevel"];
+        }
+    }
+
+    static fromJS(data: any): RecipeIngredient {
+        data = typeof data === 'object' ? data : {};
+        let result = new RecipeIngredient();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["recipeId"] = this.recipeId;
+        data["recipe"] = this.recipe ? this.recipe.toJSON() : <any>undefined;
+        data["ingredientId"] = this.ingredientId;
+        data["ingredient"] = this.ingredient ? this.ingredient.toJSON() : <any>undefined;
+        data["quantity"] = this.quantity;
+        data["importanceLevel"] = this.importanceLevel;
+        return data;
+    }
+}
+
+export interface IRecipeIngredient {
+    recipeId?: number;
+    recipe?: Recipe;
+    ingredientId?: number;
+    ingredient?: Ingredient;
+    quantity?: number;
+    importanceLevel?: number;
+}
+
+export class Recipe extends BaseAuditableEntity implements IRecipe {
+    name!: string;
+    description?: string | undefined;
+    recipeIngredients?: RecipeIngredient[];
+
+    constructor(data?: IRecipe) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            this.description = _data["description"];
+            if (Array.isArray(_data["recipeIngredients"])) {
+                this.recipeIngredients = [] as any;
+                for (let item of _data["recipeIngredients"])
+                    this.recipeIngredients!.push(RecipeIngredient.fromJS(item));
+            }
+        }
+    }
+
+    static override fromJS(data: any): Recipe {
+        data = typeof data === 'object' ? data : {};
+        let result = new Recipe();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["description"] = this.description;
+        if (Array.isArray(this.recipeIngredients)) {
+            data["recipeIngredients"] = [];
+            for (let item of this.recipeIngredients)
+                data["recipeIngredients"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IRecipe extends IBaseAuditableEntity {
+    name: string;
+    description?: string | undefined;
+    recipeIngredients?: RecipeIngredient[];
+}
+
+export class CreateRecipeCommand implements ICreateRecipeCommand {
+    name!: string;
+
+    constructor(data?: ICreateRecipeCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): CreateRecipeCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateRecipeCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface ICreateRecipeCommand {
+    name: string;
+}
+
+export class UpdateRecipeCommand implements IUpdateRecipeCommand {
+    id?: number;
+    name!: string;
+
+    constructor(data?: IUpdateRecipeCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): UpdateRecipeCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateRecipeCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IUpdateRecipeCommand {
+    id?: number;
+    name: string;
 }
 
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {
