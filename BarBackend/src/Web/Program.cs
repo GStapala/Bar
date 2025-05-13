@@ -1,6 +1,19 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using BarBackend.Infrastructure.Data;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext();
+});
+
+Log.Information("Starting bar application");
+
+builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
@@ -10,6 +23,8 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
