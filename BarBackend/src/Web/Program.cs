@@ -13,7 +13,9 @@ builder.Host.UseSerilog((context, services, configuration) =>
 
 Log.Information("Starting bar application");
 
-builder.Services.AddOpenTelemetry().UseAzureMonitor();
+var connectionStringExists = !string.IsNullOrEmpty(builder.Configuration["AzureMonitor:ConnectionString"]);
+if (connectionStringExists)
+    builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
